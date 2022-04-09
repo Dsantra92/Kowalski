@@ -3,3 +3,6 @@ sentence_transformers==2.2.0
 torch==1.11.0
 tqdm==4.62.3
 typing_extensions==4.1.1
+transfomers==4.17.0
+spacy==3.2.1
+ftfy==6.1.1
