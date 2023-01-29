@@ -2,34 +2,23 @@ import os
 from PIL import Image
 import gradio as gr
 from PIL import Image
-# from src import ClipVitB32, search
+from src import ClipVitB32, search
 
+MODEL = ClipVitB32()
 
-# MODEL = ClipVitB32()
-
-def infer(files: list, query):
-    check(files)
-    images = [Image.open(f.name) for f in files]
+def get_matching_images(uploads:list, query:str):
+    images = [Image.open(f.name) for f in uploads]
     img_embed = MODEL._gen_img_batch_encoding(images)
     hits = search(MODEL, query, img_embed)
     idx, scores = [f["corpus_id"] for f in hits], [f["score"] for f in hits]
-    result_imgs = [images[i] for i in idx]
-    fnames = [os.path.basename(f.name) for f in [files[i] for i in idx]]
-    return [[f, r, s] for (f, r, s) in zip(fnames, result_imgs, scores)]
+    res_images = [uploads[i] for i in idx]
+    return {i: {"img": img.name, "score": score} for i, (img, score) in enumerate(zip(res_images, scores))}
 
 flagging_options = [
     "This is the image I was searching for.",
     "The required image in the list of results.",
     "Results could have been better.",
 ]
-
-def get_matching_images(images:list, query:str):
-    # do something
-    # return dummy for now
-    return {i: {"img": img.name, "score": i} for (i, img) in enumerate(images)}
-
-def download_img():
-    pass
 
 ANS_DICT = {}
 ANS_POS = 0
@@ -63,14 +52,15 @@ with gr.Blocks() as demo:
             with gr.Row():
                 prev_btn = gr.Button("< Previous")
                 next_btn = gr.Button("Next >")
+            # TODO: Add a js function to download current image
             download_btn = gr.Button("Download", visible=False)
 
         def infer_and_display(images:list, query:str):
             global ANS_DICT
             ANS_DICT = get_matching_images(images, query)
             return {
-                    matched_img: gr.update(visible=True, value = ANS_DICT[0]["img"]),
-                    similarity_score: gr.update(visible=True, value = ANS_DICT[0]["score"]),
+                    matched_img: gr.update(value = ANS_DICT[0]["img"]),
+                    similarity_score: gr.update(value = ANS_DICT[0]["score"]),
                     download_btn: gr.update(visible=True),
                     }
 
@@ -91,7 +81,7 @@ with gr.Blocks() as demo:
 
         prev_btn.click(fn=prev_out, inputs=[], outputs=[matched_img, similarity_score])
         next_btn.click(fn=next_out, inputs=[], outputs=[matched_img, similarity_score])
-        next_btn.click(fn=download_img, inputs=[], outputs=[])
+        # next_btn.click(fn=download_img, inputs=[], outputs=[])
 
 if __name__ == "__main__":
     demo.launch()

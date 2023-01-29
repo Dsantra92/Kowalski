@@ -1,6 +1,5 @@
 from typing_extensions import Protocol
 from torch import Tensor
-from PIL import Image
 
 
 class TextEncoder(Protocol):
@@ -9,5 +8,5 @@ class TextEncoder(Protocol):
 
 
 class ImgEncoder(Protocol):
-    def gen_img_encoding(self, img: Image) -> Tensor:
+    def gen_img_encoding(self, img) -> Tensor:
         raise NotImplementedError
