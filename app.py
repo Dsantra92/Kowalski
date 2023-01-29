@@ -43,9 +43,9 @@ def next_out():
 
 
 with gr.Blocks() as demo:
-    gr.Markdown("Upload the images and the query that you are searching for.")
     with gr.Row():
         with gr.Column():
+            gr.Markdown("**Upload the images you want to search from**")
             file_input = gr.File(
                 file_count="multiple",
                 file_types=["image"],
@@ -53,12 +53,13 @@ with gr.Blocks() as demo:
                 interactive=True,
             )
             text_input = gr.Textbox(
-                label="Query", placeholder="Type your query here..."
+                label="Query", placeholder="Enter a description of the image..."
             )
             submit_btn = gr.Button("Submit")
             clear_btn = gr.Button("Clear")
 
         with gr.Column():
+            gr.Markdown("**Top matches**")
             matched_img = gr.Image().style(height=300)
             similarity_score = gr.Text(label="Cosine Similarity Score")
             with gr.Row():
