@@ -1,45 +1,45 @@
-import os
-from PIL import Image
+# import os
+# from PIL import Image
 import gradio as gr
-from PIL import Image
-from src import ClipVitB32, search
+# from PIL import Image
+# from src import ClipVitB32, search
 
 
-MODEL = ClipVitB32()
+# MODEL = ClipVitB32()
 
+# def infer(files: list, query):
+#     check(files)
+#     images = [Image.open(f.name) for f in files]
+#     img_embed = MODEL._gen_img_batch_encoding(images)
+#     hits = search(MODEL, query, img_embed)
+#     idx, scores = [f["corpus_id"] for f in hits], [f["score"] for f in hits]
+#     result_imgs = [images[i] for i in idx]
+#     fnames = [os.path.basename(f.name) for f in [files[i] for i in idx]]
+#     return [[f, r, s] for (f, r, s) in zip(fnames, result_imgs, scores)]
 
-def check(files: list):
-    for f in files:
-        if not f.name.endswith((".png", ".jpg", ".jpeg", ".tiff", ".tif")):
-            raise gr.InputError("Please upload an image file.")
+# flagging_options = [
+#     "This is the image I was searching for.",
+#     "The required image in the list of results.",
+#     "Results could have been better.",
+# ]
 
+with gr.Blocks() as demo:
+    gr.Markdown("Upload the images and the query that you are searching for.")
+    with gr.Column():
+        file_input = gr.File(
+            file_count="multiple", file_types=["image"], label="Images", interactive=True,
+        )
+        in_gallery = gr.Gallery(visible=False)
+        text_input = gr.Textbox(label="Query", placeholder="Type your query here...")
+        submit_btn = gr.Button("Submit")
+        clear_btn = gr.Button("Clear")
 
-def infer(files: list, query):
-    check(files)
-    images = [Image.open(f.name) for f in files]
-    img_embed = MODEL._gen_img_batch_encoding(images)
-    hits = search(MODEL, query, img_embed)
-    idx, scores = [f["corpus_id"] for f in hits], [f["score"] for f in hits]
-    result_imgs = [images[i] for i in idx]
-    fnames = [os.path.basename(f.name) for f in [files[i] for i in idx]]
-    return [[f, r, s] for (f, r, s) in zip(fnames, result_imgs, scores)]
+        matched_img = gr.Image()
+        similarity_score = gr.Text(label="Cosine Similarity Score")
+        with gr.Row():
+            prev_btn = gr.Button("< Previous")
+            next_btn = gr.Button("Next >")
+        download = gr.Button("Download")
 
-
-file_input = gr.inputs.File(
-    file_count="multiple", type="file", label="Images", optional=False
-)
-text_input = gr.inputs.Textbox(label="Query", optional=False)
-flagging_options = [
-    "This is the image I was searching for.",
-    "The required image in the list of results.",
-    "Results could have been better.",
-]
-output = gr.outputs.Carousel(["text", "image", "text"], label="Top 3 results")
-
-iface = gr.Interface(
-    fn=infer,
-    inputs=[file_input, text_input],
-    outputs=output,
-    flagging_options=flagging_options,
-)
-iface.launch()
+if __name__ == "__main__":
+    demo.launch()
